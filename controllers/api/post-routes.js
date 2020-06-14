@@ -1,6 +1,6 @@
 const router = require('express').Router();
-const sequelize = require('../../config/connection');
 const { Post, User, Vote, Comment } = require('../../models');
+const sequelize = require('../../config/connection');
 const withAuth = require('../../utils/auth');
 
 // get all users
@@ -16,7 +16,7 @@ router.get('/', (req, res) => {
           ],
       order: [['created_at', 'DESC']],
       include: [
-        // include the Comment model here:
+        // Comment model here -- attached username to comment
         {
           model: Comment,
           attributes: ['id', 'comment_text', 'post_id', 'user_id', 'created_at'],
@@ -28,7 +28,7 @@ router.get('/', (req, res) => {
         {
           model: User,
           attributes: ['username']
-        }
+        },
       ]
     })
       .then(dbPostData => res.json(dbPostData))
@@ -84,7 +84,7 @@ router.post('/', withAuth, (req, res) => {
     Post.create({
       title: req.body.title,
       post_url: req.body.post_url,
-      user_id: req.body.user_id
+      user_id: req.session.user_id
     })
       .then(dbPostData => res.json(dbPostData))
       .catch(err => {
@@ -109,16 +109,14 @@ router.post('/', withAuth, (req, res) => {
 
 
 router.put('/:id', withAuth, (req, res) => {
-    Post.update(
-      {
+    Post.update({
         title: req.body.title
       },
       {
         where: {
           id: req.params.id
         }
-      }
-    )
+      })
       .then(dbPostData => {
         if (!dbPostData) {
           res.status(404).json({ message: 'No post found with this id' });
