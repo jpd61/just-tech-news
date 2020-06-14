@@ -19,6 +19,9 @@ router.get('/', (req, res) => {
 router.get('/:id', (req, res) => {
     User.findOne({
         attributes: { exclude: ['password']},
+        where: {
+          id: req.params.id
+        },
         include: [
             {
               model: Post,
@@ -39,9 +42,7 @@ router.get('/:id', (req, res) => {
               as: 'voted_posts'
             }
           ],
-        where: {
-        id: req.params.id
-      }
+
     })
       .then(dbUserData => {
         if (!dbUserData) {
@@ -109,6 +110,17 @@ router.post('/', withAuth, (req, res) => {
     });
   });
 
+  router.post('/logout', (req, res) => {
+    if (req.session.loggedIn) {
+      req.session.destroy(() => {
+        res.status(204).end();
+      });
+    }
+    else {
+      res.status(404).end();
+    }
+  });
+
 // PUT /api/users/1
 router.put('/:id', withAuth, (req, res) => {
     // expects {username: 'Lernantino', email: 'lernantino@gmail.com', password: 'password1234'}
@@ -117,7 +129,7 @@ router.put('/:id', withAuth, (req, res) => {
     User.update(req.body, {
         individualHooks: true,
         where: {
-        id: req.params.id
+            id: req.params.id
       }
     })
       .then(dbUserData => {
@@ -151,17 +163,6 @@ router.delete('/:id', withAuth, (req, res) => {
         console.log(err);
         res.status(500).json(err);
       });
-  });
-
-  router.post('/logout', (req, res) => {
-    if (req.session.loggedIn) {
-      req.session.destroy(() => {
-        res.status(204).end();
-      });
-    }
-    else {
-      res.status(404).end();
-    }
   });
 
 module.exports = router;
