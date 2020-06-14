@@ -1,7 +1,7 @@
 {
   "name": "just-tech-news",
   "version": "1.0.0",
-  "description": "",
+  "description": "CMS using Sequelize, JavaScript, and Node.js",
   "main": "server.js",
   "scripts": {
     "test": "jest",
